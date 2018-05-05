@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Mousetrap from 'mousetrap';
 import _ from 'lodash';
+import Hammer from 'hammerjs';
 
 const ROW_COUNT = 4;
 const COL_COUNT = 4;
@@ -218,11 +219,15 @@ class Game extends Component {
   }
 
   bindHotkeys() {
+    this.hammer = new Hammer(this.container);
+    this.hammer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
     _.map(DIRECTIONS, (direction, i) => {
-      Mousetrap.bind(direction.toLowerCase(), () => {
+      const fn = () => {
         this.move(direction);
         return false;
-      });
+      };
+      Mousetrap.bind(direction.toLowerCase(), fn);
+      this.hammer.on('swipe' + direction.toLowerCase(), fn);
       return null;
     });
   }
@@ -248,7 +253,7 @@ class Game extends Component {
 
   render() {
     const { matrix } = this.state;
-    return <div className="game-container">
+    return <div className="game-container" ref={(el) => this.container = el}>
       <div className="game-grid">
       {_.map(_.range(ROW_COUNT), function(row) {
         return <div className="game-grid-row" key={row}>
