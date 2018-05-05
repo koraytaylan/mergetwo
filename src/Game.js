@@ -188,12 +188,27 @@ function getCellClass(value) {
   return "";
 }
 
+function loadMatrix() {
+  const json = localStorage.getItem('matrix');
+  return JSON.parse(json);
+}
+
+function saveMatrix(matrix) {
+  localStorage.setItem('matrix', JSON.stringify(matrix));
+}
+
 class Game extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      matrix: createMatrix()
+    let matrix;
+    try {
+      matrix = loadMatrix();
+    } catch (e) {
+      matrix = createMatrix();
     }
+    this.state = {
+      matrix
+    };
   }
 
   move(direction) {
@@ -213,6 +228,7 @@ class Game extends Component {
     if (!_.isEqual(initialMatrix, matrix)) {
       matrix = fillRandomEmptyCell(matrix);
     }
+    saveMatrix(matrix);
     this.setState({
       matrix
     });
