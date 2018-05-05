@@ -89,7 +89,7 @@ function getFarthestFacet(direction) {
   return facet;
 }
 
-function pushCell(matrix, address, direction) {
+function pushCell(matrix, address, direction, justMerged) {
   if (isFarthest(address, direction)) {
     return false;
   }
@@ -101,16 +101,20 @@ function pushCell(matrix, address, direction) {
   let currentAddress = address;
   let nextAddress = [address[0] + vector[0], address[1] + vector[1]];
   let nextValue = matrix[nextAddress[0]][nextAddress[1]];
-  while (nextValue === 0 && !isFarthest(nextAddress, direction)) {
+  while (nextValue === 0) {
     matrix[currentAddress[0]][currentAddress[1]] = 0;
     matrix[nextAddress[0]][nextAddress[1]] = value;
     currentAddress = nextAddress;
+    if (isFarthest(currentAddress, direction)) {
+      return false;
+    }
     nextAddress = [nextAddress[0] + vector[0], nextAddress[1] + vector[1]];
     nextValue = matrix[nextAddress[0]][nextAddress[1]];
   }
-  if (nextValue === value || nextValue === 0) {
+  if (!justMerged && nextValue === value) {
     matrix[currentAddress[0]][currentAddress[1]] = 0;
     matrix[nextAddress[0]][nextAddress[1]] = value + nextValue;
+    return true;
   }
   return false;
 }
@@ -143,6 +147,46 @@ function hasAnyMoves(matrix) {
   return false;
 }
 
+function getCellClass(value) {
+  if (value === 0) {
+    return "has-background-white-ter";
+  }
+  if (value === 2) {
+    return "has-background-primary";
+  }
+  if (value === 4) {
+    return "has-background-info";
+  }
+  if (value === 8) {
+    return "has-background-link";
+  }
+  if (value === 16) {
+    return "has-background-success";
+  }
+  if (value === 32) {
+    return "has-background-warning";
+  }
+  if (value === 64) {
+    return "has-background-danger";
+  }
+  if (value === 128) {
+    return "has-background-grey";
+  }
+  if (value === 256) {
+    return "has-background-grey-dark";
+  }
+  if (value === 512) {
+    return "has-background-grey-darker";
+  }
+  if (value === 1024) {
+    return "has-background-black-ter";
+  }
+  if (value >= 2048) {
+    return "has-background-black-bis";
+  }
+  return "";
+}
+
 class Game extends Component {
   constructor(props) {
     super(props);
@@ -159,8 +203,9 @@ class Game extends Component {
     const facet = getFarthestFacet(direction);
     _.forEach(facet, address => {
       let currentAddress = address;
+      let justMerged = false;
       while(isValid(currentAddress)) {
-        pushCell(matrix, currentAddress, direction);
+        justMerged = pushCell(matrix, currentAddress, direction, justMerged);
         currentAddress = [currentAddress[0] + inversedVector[0], currentAddress[1] + inversedVector[1]];
       }
     });
@@ -203,14 +248,17 @@ class Game extends Component {
 
   render() {
     const { matrix } = this.state;
-    return <div className="container">
+    return <div className="game-container">
+      <div className="game-grid">
       {_.map(_.range(ROW_COUNT), function(row) {
-        return <div className="columns" key={row}>
+        return <div className="game-grid-row" key={row}>
           {_.map(_.range(COL_COUNT), function(col) {
-            return <div className="column" key={col}><span className="is-size-1">{matrix[col][row] === 0 ? '.' : matrix[col][row]}</span></div>
+            const value = matrix[col][row];
+            return <div className={"game-grid-cell " + getCellClass(value)} key={col}><span>{matrix[col][row] === 0 ? '' : matrix[col][row]}</span></div>
           })}
         </div>
       })}
+      </div>
     </div>
   }
 }
