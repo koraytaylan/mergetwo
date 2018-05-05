@@ -27,12 +27,12 @@ html, body {height: 100%}
   flex: 1;
   justify-content: center;
   align-items: center;
-  /*background-color: hsl(217, 71%, 53%);*/
-  border-radius: 1vw;
+  border-radius: 1vh;
+  overflow: hidden;
 }
 
 .game-grid-cell span {
-  font-size: 5vw;
+  font-size: 8vh;
   font-weight: bold;
 }
 
