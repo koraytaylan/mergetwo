@@ -174,16 +174,16 @@ function getCellClass(value) {
     return "has-background-grey";
   }
   if (value === 256) {
-    return "has-background-grey-dark";
+    return "has-background-grey-dark has-text-white";
   }
   if (value === 512) {
-    return "has-background-grey-darker";
+    return "has-background-grey-darker has-text-white";
   }
   if (value === 1024) {
-    return "has-background-black-ter";
+    return "has-background-black-ter has-text-white";
   }
   if (value >= 2048) {
-    return "has-background-black-bis";
+    return "has-background-black-bis has-text-white";
   }
   return "";
 }
