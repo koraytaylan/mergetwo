@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Mousetrap from 'mousetrap';
 import _ from 'lodash';
 import Hammer from 'hammerjs';
+import packageJson from '../package.json'
 
 const ROW_COUNT = 4;
 const COL_COUNT = 4;
@@ -150,7 +151,7 @@ function hasAnyMoves(matrix) {
 
 function getCellClass(value) {
   if (value === 0) {
-    return "has-background-white-ter";
+    return "has-background-white-bis";
   }
   if (value === 2) {
     return "has-background-primary";
@@ -203,36 +204,19 @@ class Game extends Component {
     let matrix;
     try {
       matrix = loadMatrix();
-    } catch (e) {
+    } catch (e) {}
+    if (_.isEmpty(matrix)) {
       matrix = createMatrix();
     }
     this.state = {
-      matrix
+      matrix,
+      matrixHistory: []
     };
   }
 
-  move(direction) {
-    let { matrix } = this.state;
-    const initialMatrix = _.cloneDeep(matrix);
-    const vector = VECTORS[direction];
-    const inversedVector = [vector[0] * -1, vector[1] * -1];
-    const facet = getFarthestFacet(direction);
-    _.forEach(facet, address => {
-      let currentAddress = address;
-      let justMerged = false;
-      while(isValid(currentAddress)) {
-        justMerged = pushCell(matrix, currentAddress, direction, justMerged);
-        currentAddress = [currentAddress[0] + inversedVector[0], currentAddress[1] + inversedVector[1]];
-      }
-    });
-    if (!_.isEqual(initialMatrix, matrix)) {
-      matrix = fillRandomEmptyCell(matrix);
-    }
-    saveMatrix(matrix);
-    this.setState({
-      matrix
-    });
-  }
+  componentDidMount = () => {
+    this.bindHotkeys();
+  };
 
   bindHotkeys() {
     this.hammer = new Hammer(this.container);
@@ -248,9 +232,51 @@ class Game extends Component {
     });
   }
 
-  componentDidMount = () => {
-    this.bindHotkeys();
-  };
+  move(direction) {
+    let { matrix, matrixHistory } = this.state;
+    const initialMatrix = _.cloneDeep(matrix);
+    const vector = VECTORS[direction];
+    const inversedVector = [vector[0] * -1, vector[1] * -1];
+    const facet = getFarthestFacet(direction);
+    _.forEach(facet, address => {
+      let currentAddress = address;
+      let justMerged = false;
+      while(isValid(currentAddress)) {
+        justMerged = pushCell(matrix, currentAddress, direction, justMerged);
+        currentAddress = [currentAddress[0] + inversedVector[0], currentAddress[1] + inversedVector[1]];
+      }
+    });
+    if (!_.isEqual(initialMatrix, matrix)) {
+      matrix = fillRandomEmptyCell(matrix);
+      matrixHistory.push(initialMatrix);
+    }
+    saveMatrix(matrix);
+    this.setState({
+      matrix,
+      matrixHistory
+    });
+  }
+
+  reset() {
+    const matrix = createMatrix();
+    saveMatrix(matrix);
+    this.setState({
+      matrix
+    });
+  }
+
+  undo() {
+    const { matrixHistory } = this.state;
+    if (_.isEmpty(matrixHistory)) {
+      return;
+    }
+    const previousMatrix = matrixHistory.pop();
+    saveMatrix(previousMatrix);
+    this.setState({
+      matrix: previousMatrix,
+      matrixHistory
+    });
+  }
 
   renderTable() {
     const { matrix } = this.state;
@@ -270,15 +296,37 @@ class Game extends Component {
   render() {
     const { matrix } = this.state;
     return <div className="game-container" ref={(el) => this.container = el}>
-      <div className="game-grid">
-      {_.map(_.range(ROW_COUNT), function(row) {
-        return <div className="game-grid-row" key={row}>
-          {_.map(_.range(COL_COUNT), function(col) {
-            const value = matrix[col][row];
-            return <div className={"game-grid-cell " + getCellClass(value)} key={col}><span>{matrix[col][row] === 0 ? '' : matrix[col][row]}</span></div>
-          })}
+      <div className="game-header">
+        <div className="is-pulled-left">
+          <span className="is-size-4">mergetwo</span>
         </div>
-      })}
+        <div className="field is-grouped is-pulled-right">
+          <p className="control">
+            <a className="button is-small" onClick={() => this.undo()}>
+              <span className="icon is-small">
+                <i className="fas fa-undo"></i>
+              </span>
+            </a>
+          </p>
+          <p className="control">
+            <a className="button is-link is-small" onClick={() => this.reset()}>New Game</a>
+          </p>
+        </div>
+      </div>
+      <div className="game-grid-container">
+        <div className="game-grid has-background-white-bis">
+        {_.map(_.range(ROW_COUNT), function(row) {
+          return <div className="game-grid-row" key={row}>
+            {_.map(_.range(COL_COUNT), function(col) {
+              const value = matrix[col][row];
+              return <div className={"game-grid-cell " + getCellClass(value)} key={col}><span>{matrix[col][row] === 0 ? '' : matrix[col][row]}</span></div>
+            })}
+          </div>
+        })}
+        </div>
+      </div>
+      <div className="game-footer">
+        <span className="is-pulled-right is-size-7">v{packageJson.version}</span>
       </div>
     </div>
   }
