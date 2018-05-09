@@ -2,6 +2,10 @@
   "name": "mergetwo",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "homepage": "https://mergetwo.com",
+  "repository": "github:koraytaylan/mergetwo",
+  "author": "Koray Taylan Davgana <koraytaylan@gmail.com> (https://koraytaylan.com)",
   "dependencies": {
     "bulma": "^0.7.1",
     "hammerjs": "^2.0.8",
