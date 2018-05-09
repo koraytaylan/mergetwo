@@ -1,19 +1,42 @@
-html, body {height: 100%}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
-.game-container {
+#root {
   width: 100%;
   height: 100%;
+}
+
+.app {
+  width: 100%;
+  height: 100%;
+}
+
+.game-container {
+  margin: 0px auto;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+
+  width: 80vmin;
+}
+
+.game-header {
+  padding: 1vmin;
+}
+
+.game-grid-container {
+  flex: 1;
 }
 
 .game-grid {
-  padding: 20px;
+  padding: 2vmin;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  width: 100vmin;
-  height: 100vmin;
+  height: 80vmin;
+  border-radius: 2vmin;
 }
 
 .game-grid-row {
@@ -27,19 +50,19 @@ html, body {height: 100%}
   flex: 1;
   justify-content: center;
   align-items: center;
-  border-radius: 1vh;
+  border-radius: 2vmin;
   overflow: hidden;
 }
 
 .game-grid-cell span {
-  font-size: 8vh;
+  font-size: 8vmin;
   font-weight: bold;
 }
 
 .game-grid-row+.game-grid-row{
-  margin-top: 1vw;
+  margin-top: 2vmin;
 }
 
 .game-grid-cell+.game-grid-cell{
-  margin-left: 1vw;
+  margin-left: 2vmin;
 }
